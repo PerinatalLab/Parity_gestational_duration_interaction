@@ -1,0 +1,9 @@
+Parity,Beta,CILow,CIHigh,Model
+Parity zero,-2.1805932663317,-2.61442369730494,-1.74676283535846,"Mother herself preterm, Parity = zero"
+Parity one,-1.77892709920839,-2.14409110151692,-1.41376309689985,"Mother herself preterm, Parity = zero"
+Parity two,-1.30055070298416,-2.05122144792508,-0.549879958043247,"Mother herself preterm, Parity = zero"
+Parity ≥ three,-2.08424981444416,-3.78088186102459,-0.387617767863736,"Mother herself preterm, Parity = zero"
+Parity zero,-1.27365161612298,-1.68519135462376,-0.862111877622199,"Mother herself preterm, Parity > zero"
+Parity one,-1.71829610609202,-2.05610737302744,-1.3804848391566,"Mother herself preterm, Parity > zero"
+Parity two,-2.18988325523481,-2.83738245268306,-1.54238405778657,"Mother herself preterm, Parity > zero"
+Parity ≥ three,-3.08188575071948,-4.51448391911857,-1.64928758232038,"Mother herself preterm, Parity > zero"

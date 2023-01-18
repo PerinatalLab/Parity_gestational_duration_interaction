@@ -1,0 +1,16 @@
+# Ignore these directories:
+not_use/
+not_using/
+
+#Ignor
+##Ignoree
+.snakemake/
+# Ignore parts of results:
+*.eps
+model_info*
+descriptive_table.csv
+*_model_info.csv
+maternal_characteristics_descriptive_supp_table1.csv
+quantiles_suppTable3.csv
+simulation_group_bias_supp_table2.csv
+*.png 

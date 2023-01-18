@@ -1,0 +1,16 @@
+name: filtering
+channels:
+        - conda-forge
+        - bioconda 
+dependencies:
+        - R = 4.0
+        - r-dplyr = 1.0.7
+        - r-data.table = 1.14.0
+        - r-gamlss = 5.3.4
+        - r-ggplot2 = 3.3.5
+        - r-rcolorbrewer = 1.1.2
+        - r-hexbin = 1.28.2
+        - r-tidyr = 1.1.4
+        - r-lubridate = 1.8.0
+defaults: []
+channel_priority: strict 

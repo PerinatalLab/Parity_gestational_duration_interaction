@@ -1,0 +1,5 @@
+Parity,Beta,CILow,CIHigh,Model
+Parity 0,-3.09545563805393,-3.55400264010348,-2.63690863600437,Maternal sister given birth preterm
+Parity 1,-1.93981067064324,-2.31607540685446,-1.56354593443202,Maternal sister given birth preterm
+Parity 2,-1.69563416501837,-2.37819162548667,-1.01307670455007,Maternal sister given birth preterm
+Parity ≥ 3,-0.602497746810545,-1.94548741231258,0.740491918691492,Maternal sister given birth preterm
