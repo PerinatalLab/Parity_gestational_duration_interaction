@@ -191,7 +191,7 @@ p = plotdata %>%
   ) +
   scale_shape_manual(labels=c("Preterm delivery firstborn","Previous delivery preterm"),values=c("PTD first born" = 24, "Prev PTD" = 23), guide = guide_legend(title.position="top",title.hjust =0.5, title="Clinical history of preterm delivery")) +
   scale_fill_manual(values=c("PTD first born" ="#756bb1","Prev PTD"= "#bcbddc"),labels=c("Preterm delivery firstborn","Previous delivery preterm"),guide = guide_legend(title.position="top",title.hjust =0.5, title = "Clinical history of preterm delivery") )  + 
-  geom_text(data = text_dat, aes(x = -15, y = c(0.65,0.65,0.45), label = lbl), hjust = 0, colour = "black", angle=90,size=10/.pt) +
+  geom_text(data = text_dat, aes(x = -15, y = c(0.64,0.64,0.45), label = lbl), hjust = 0, colour = "black", angle=90,size=10/.pt) +
   scale_x_continuous(breaks = seq(-14, 0.5, by = 2))
 
 
