@@ -64,7 +64,7 @@ beta_CI = function(Model, CI_min, CI_max) {
   m =character()
   for (i in 2) {
           mm = summary(Model)$coefficients[i,1]
-          err = confint(Model, level=0.95, method = "Wald")[i+2,]
+          err = confint(Model, level=0.95, method = "Wald")[i,]
           m = rbind(m,c(err[1],mm,err[2]))
   }
   rownames(m) = c("NotByParity")
@@ -73,13 +73,13 @@ beta_CI = function(Model, CI_min, CI_max) {
 }
 
 # First born
-m1 = lmer(GRDBS ~ PTB_first_born + Parity_logreg + KON + AR + AR2 + mor_birth_country_NORDIC + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far) + (1|lpnr_mor), data = dat_m21,control = lmerControl(optimizer ="bobyqa"))
+m1 = lm(GRDBS ~ PTB_first_born + Parity_logreg + KON + AR + AR2 + mor_birth_country_NORDIC + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far), data = dat_m21)
 betam1=beta_CI(m1, 0.025,0.975)
 print(summary(m1))
 
 # prev PTD
 dat_m22 = dat_m21 %>% group_by(lpnr_mor) %>% filter(!is.na(prev_PTD)) %>% filter(n()>1)
-m2 = lmer(GRDBS ~ prev_PTD + Parity_logreg + KON + AR + AR2 + mor_birth_country_NORDIC + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far) + (1|lpnr_mor), data = dat_m22, control = lmerControl(optimizer ="bobyqa"))
+m2 = lm(GRDBS ~ prev_PTD + Parity_logreg + KON + AR + AR2 + mor_birth_country_NORDIC + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far), data = dat_m22)
 betam2=beta_CI(m2, 0.025,0.975)
 print(summary(m2))
 
@@ -89,7 +89,7 @@ beta_CI = function(Model, CI_min, CI_max) {
   m =character()
   for (i in 13:14) {
           mm = summary(Model)$coefficients[i,1]
-          err = confint(Model, level=0.95, method = "Wald")[i+2,]
+          err = confint(Model, level=0.95, method = "Wald")[i,]
           m = rbind(m,c(err[1],mm,err[2]))
   }
   rownames(m) = c("Parity_logreg3:obshist","Parity_logreg4:obhist")
@@ -99,12 +99,12 @@ beta_CI = function(Model, CI_min, CI_max) {
 }
 
 # Firstborn 
-mI1 = lmer(GRDBS ~ Parity_logreg*PTB_first_born + KON + AR + AR2 + mor_birth_country_NORDIC + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far) + (1|lpnr_mor), data = dat_m21,control = lmerControl(optimizer ="bobyqa"))
+mI1 = lm(GRDBS ~ Parity_logreg*PTB_first_born + KON + AR + AR2 + mor_birth_country_NORDIC + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far), data = dat_m21)
 betamI1=beta_CI(mI1, 0.025,0.975)
 print(summary(mI1))
 
 #prev ptd 
-mI2 = lmer(GRDBS ~ Parity_logreg*prev_PTD + KON + AR + AR2 + mor_birth_country_NORDIC + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far) + (1|lpnr_mor), data = dat_m22, control = lmerControl(optimizer ="bobyqa"))
+mI2 = lm(GRDBS ~ Parity_logreg*prev_PTD + KON + AR + AR2 + mor_birth_country_NORDIC + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far), data = dat_m22)
 betamI2=beta_CI(mI2, 0.025,0.975)
 print(summary(mI2))
 
@@ -213,12 +213,12 @@ p = plotdata %>%
 #ggsave("/home/karin/Parity_Project_gd/scripts/plots/Supplementary/output/obstetric_history_only_spont.png",p, width = 174, height = 105, dpi = 1200, units = "mm", device='png')
 ggsave(snakemake@output[[1]],p, width = 174, height = 105, dpi = 1200, units = "mm", device='png')
 
-model_info_final = rbind(c("first_born", nobs(mp2), nobs(mp3), nobs(mp4),"-" ),
-			 c("prev_ptd",  nobs(m2p2), nobs(m2p3), nobs(m2p4),"-"),
-			 c("whole_pop_firstborn",nobs(m1),"-","-",m1@Gp[2]),
-		         c("whole_pop_prev_ptd", nobs(m2),"-","-",m2@Gp[2]),
-		         c("interaction_firstborn", nobs(mI1),"-","-",mI1@Gp[2]),
-		         c("interaction_prev_ptd", nobs(mI2),"-","-",mI2@Gp[2])) 
+model_info_final = rbind(c("first_born", nobs(mp2), nobs(mp3), nobs(mp4)),
+			 c("prev_ptd",  nobs(m2p2), nobs(m2p3), nobs(m2p4)),
+			 c("whole_pop_firstborn",nobs(m1),"-","-"),
+		         c("whole_pop_prev_ptd", nobs(m2),"-","-"),
+		         c("interaction_firstborn", nobs(mI1),"-","-"),
+		         c("interaction_prev_ptd", nobs(mI2),"-","-") )
 
 
 #fwrite(as.data.frame(model_info_final),"/home/karin/Parity_Project_gd/scripts/plots/Supplementary/output/clinical_history_model_info_only_spont.csv",sep=",")
