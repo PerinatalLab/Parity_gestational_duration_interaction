@@ -25,7 +25,7 @@ dat$mother_herself_PTB = factor(dat$mother_herself_PTB)
 
 
 
-#### Finding which parity the was born as ####
+#### Finding which parity the mother was born as ####
 barn = dat %>% pull(lpnr_BARN)
 mor_also_barn_in_mfr =  dat[dat$lpnr_mor %in% barn,]
 mor_also_barn_in_mfr = mor_also_barn_in_mfr %>% select(lpnr_mor)

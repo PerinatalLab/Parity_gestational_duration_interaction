@@ -29,14 +29,11 @@ cat("Number of full sibling groups based on ID_full_siblings:", length(unique(p_
 ## Full sisters (mothers)
 # Thus conecting the mothers sisters (not the childrens sibling). 
 # Mor in G1: can not connect her to her siblings (Do not have that information, can only connect the data I have and highest in the tree will always be a mother och a father alone whit no siblings)
-p_id_barn_full_S_ID = p_id %>%  ungroup() %>% select(lpnr_BARN, ID_full_siblings) # extracting the children and their sibling ID for the whole data set
-p_id_mor = p_id %>% ungroup() %>% select(lpnr_mor) # extracting the mothers from the whole data set
-p_id_mor = cbind(p_id_mor,p_id_mor) # When using join future down the lpnr_mor will disappear and that's why the matrix contain the same information in two columns
-colnames(p_id_mor) = c("lpnr_mor","lpnr_Mor")
 
-p_id_join=inner_join(p_id_barn_full_S_ID, p_id_mor,by = c("lpnr_BARN" = "lpnr_Mor")) %>% select(-lpnr_BARN,) # Connecting each row where the ID exist in both the mother ID column  och child ID column to identify mother sibling. Here lpnr_MOR will disapear and lpnr_mor be left in the new data frame.
-p_id_join=unique(p_id_join) # to not add rows in our dataset when using left_join in the next step
-p_id = left_join(p_id,p_id_join, by="lpnr_mor") # adding the sister ID
+p_id = p_id %>% 
+  ungroup() %>%
+  select(one_of(c("lpnr_BARN", "ID_full_siblings"))) %>%
+  left_join(p_id, ., by=c("lpnr_mor" = "lpnr_BARN"))
 
 colnames(p_id) = c("lpnr_BARN","lpnr_mor","ar_mor","lpnr_far","ar_far","parents","ID_full_siblings", "ID_mor_full_siblings") # obs not sbilings, sisters
 
