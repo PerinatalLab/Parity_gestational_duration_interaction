@@ -30,14 +30,11 @@ cat("Number of full sibling groups based on ID_full_siblings:", length(unique(p_
 # Thus conecting the mothers siblings (not the childrens sibling). 
 # All mothers can not be connect her to her siblings (Do not have that information, mothers need to be children in the registry)
 
-p_id_barn_full_S_ID = p_id %>%  ungroup() %>% select(lpnr_BARN, ID_full_siblings) # extracting the children and their sibling ID for the whole data set
-p_id_mor = p_id %>% ungroup() %>% select(lpnr_mor) # extracting the mothers from the whole data set
-p_id_mor = cbind(p_id_mor,p_id_mor) # When using join future down the lpnr_mor will disappear and that's why the matrix contain the same information in two columns
-colnames(p_id_mor) = c("lpnr_mor","lpnr_Mor")
-
-p_id_join=inner_join(p_id_barn_full_S_ID, p_id_mor,by = c("lpnr_BARN" = "lpnr_Mor")) %>% select(-lpnr_BARN,) # Connecting each row where the ID exist in both the mother ID column  och child ID column to identify mother sibling. Here lpnr_MOR will disapear and lpnr_mor be left in the new data frame.
-p_id_join=unique(p_id_join) # to not add rows in our dataset when using left_join in the next step
-p_id = left_join(p_id,p_id_join, by="lpnr_mor") # adding the sibling ID
+# this should do the same
+p_id = p_id %>% 
+  ungroup() %>%
+  select(one_of(c("lpnr_BARN", "ID_full_siblings"))) %>%
+  left_join(p_id, ., by=c("lpnr_mor" = "lpnr_BARN"))
 
 colnames(p_id) = c("lpnr_BARN","lpnr_mor","ar_mor","lpnr_far","ar_far","parents","ID_full_siblings", "ID_mor_full_siblings")
 
@@ -46,15 +43,22 @@ sibling = p_id %>% ungroup() %>% select(lpnr_mor, ID_mor_full_siblings)
 sibling = unique(sibling)
 dat1 = left_join(dat, sibling, by="lpnr_mor")
 
+# remove moms w/o siblings for simplicity
+dat1 = filter(dat1, !is.na(ID_mor_full_siblings))
 
 ## Full maternal sisters giving ptd in any child before "you"
 dat3 = dat1 %>% group_by(lpnr_mor) %>% arrange(BFODDAT) %>% 
-mutate(cumPTDpermor =  cumsum(PTB)) 
+  mutate(cumPTDpermor =  cumsum(PTB)) %>%
+  ungroup()
 
 test = dat3 %>% group_by(ID_mor_full_siblings) %>% arrange(BFODDAT) %>% 
-mutate(maternal_sisters_children_born_PTB_1 =  cumsum(PTB) -cumPTDpermor,0) %>% 
-mutate(maternal_sisters_children_born_PTB_1 = ifelse(min(lpnr_mor) == max(lpnr_mor) | is.na(ID_mor_full_siblings),NA,maternal_sisters_children_born_PTB_1)) %>% ungroup() %>% group_by(lpnr_mor) %>%
-mutate(maternal_sisters_children_born_PTB = max(maternal_sisters_children_born_PTB_1)) %>% mutate(maternal_sisters_children_born_PTB = ifelse(maternal_sisters_children_born_PTB>=1,1,0)) %>% ungroup() %>% select(lpnr_BARN,maternal_sisters_children_born_PTB)
+mutate(maternal_sisters_children_born_PTB_1 =  cumsum(PTB) -cumPTDpermor) %>% 
+mutate(maternal_sisters_children_born_PTB_1 = ifelse(min(lpnr_mor) == max(lpnr_mor) | is.na(ID_mor_full_siblings),NA,maternal_sisters_children_born_PTB_1)) %>%
+ungroup() %>% group_by(lpnr_mor) %>%
+mutate(maternal_sisters_children_born_PTB = max(maternal_sisters_children_born_PTB_1)) %>%
+# TODO here change to other definition if needed
+mutate(maternal_sisters_children_born_PTB = maternal_sisters_children_born_PTB>=1) %>%  # for speed, creating a boolean instead of ifelse
+ungroup() %>% select(lpnr_BARN,maternal_sisters_children_born_PTB)
 
 dat4 = left_join(dat3,test, by="lpnr_BARN")
 
