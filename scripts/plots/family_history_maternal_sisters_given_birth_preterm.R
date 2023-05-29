@@ -30,7 +30,6 @@ cat("Number of full sibling groups based on ID_full_siblings:", length(unique(p_
 # Thus conecting the mothers siblings (not the childrens sibling). 
 # All mothers can not be connect her to her siblings (Do not have that information, mothers need to be children in the registry)
 
-# this should do the same
 p_id = p_id %>% 
   ungroup() %>%
   select(one_of(c("lpnr_BARN", "ID_full_siblings"))) %>%
@@ -43,26 +42,22 @@ sibling = p_id %>% ungroup() %>% select(lpnr_mor, ID_mor_full_siblings)
 sibling = unique(sibling)
 dat1 = left_join(dat, sibling, by="lpnr_mor")
 
-# remove moms w/o siblings for simplicity
+## Remove moms w/o siblings for simplicity
 dat1 = filter(dat1, !is.na(ID_mor_full_siblings))
 
-## Full maternal sisters giving ptd in any child before "you"
-dat3 = dat1 %>% group_by(lpnr_mor) %>% arrange(BFODDAT) %>% 
-  mutate(cumPTDpermor =  cumsum(PTB)) %>%
+## Full maternal sisters giving ptd in any child (past+ future)
+dat3 = dat1 %>% group_by(lpnr_mor) %>% 
+  mutate(PTDpermor =  sum(PTB)) %>%
   ungroup()
 
-test = dat3 %>% group_by(ID_mor_full_siblings) %>% arrange(BFODDAT) %>% 
-mutate(maternal_sisters_children_born_PTB_1 =  cumsum(PTB) -cumPTDpermor) %>% 
+test = dat3 %>% group_by(ID_mor_full_siblings)  %>% 
+mutate(maternal_sisters_children_born_PTB_1 =  sum(PTB) - PTDpermor) %>%
 mutate(maternal_sisters_children_born_PTB_1 = ifelse(min(lpnr_mor) == max(lpnr_mor) | is.na(ID_mor_full_siblings),NA,maternal_sisters_children_born_PTB_1)) %>%
 ungroup() %>% group_by(lpnr_mor) %>%
 mutate(maternal_sisters_children_born_PTB = max(maternal_sisters_children_born_PTB_1)) %>%
-# TODO here change to other definition if needed
-mutate(maternal_sisters_children_born_PTB = maternal_sisters_children_born_PTB>=1) %>%  # for speed, creating a boolean instead of ifelse
-ungroup() %>% select(lpnr_BARN,maternal_sisters_children_born_PTB)
+ ungroup() %>% select(lpnr_BARN,maternal_sisters_children_born_PTB)
 
-dat4 = left_join(dat3,test, by="lpnr_BARN")
-
-dat = dat4
+dat = left_join(dat3,test, by="lpnr_BARN")
 
 
 
@@ -102,6 +97,14 @@ dat_m2 = fun_spont1990(dat1)
 ## Whole population + interaction
 dat_m21 = group_by(dat_m2, lpnr_mor) %>% filter(n()>1)
 
+## one random sister per sister ID
+set.seed(42)
+rows <- sample(nrow(dat_m21))
+dat_m2 <- dat_m21[rows, ]
+dat_m2 = dat_m2 %>% group_by(ID_mor_full_siblings) %>% filter(row_number()==1) %>% pull(lpnr_mor)
+dat_m22 = dat_m21[dat_m21$lpnr_mor %in% dat_m2,]
+
+
 ## maternal sibling ptb
 beta_CI = function(Model, CI_min, CI_max) {
   m =character()
@@ -116,13 +119,13 @@ beta_CI = function(Model, CI_min, CI_max) {
 }
 
 
-m4 = lmer(GRDBS ~ maternal_sisters_children_born_PTB + Parity_logreg + KON + AR + AR2 + MALDER2  + as.numeric(max_grade_mor) + as.numeric(max_grade_far)+ (1|lpnr_mor), data = dat_m21, control = lmerControl(optimizer ="bobyqa"))
+m4 = lmer(GRDBS ~ as.numeric(maternal_sisters_children_born_PTB) + Parity_logreg + KON + AR + AR2 + MALDER2  + as.numeric(max_grade_mor) + as.numeric(max_grade_far)+ (1|lpnr_mor), data = dat_m22, control = lmerControl(optimizer ="bobyqa"))
 betam4 = beta_CI(m4,0.025,0.975)
 print(summary(m4))
 print(betam4)
 
 
-mI4 = lmer(GRDBS ~ Parity_logreg*maternal_sisters_children_born_PTB + KON + AR + AR2 + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far) + (1|lpnr_mor), data = dat_m21, control = lmerControl(optimizer ="bobyqa"))
+mI4 = lmer(GRDBS ~ Parity_logreg*as.numeric(maternal_sisters_children_born_PTB) + KON + AR + AR2 + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far) + (1|lpnr_mor), data = dat_m22, control = lmerControl(optimizer ="bobyqa"))
 print(summary(mI4))
 
 
@@ -140,16 +143,16 @@ beta_CI = function(Model, CI_min, CI_max) {
 }
 
 
-m2p1 = lm(GRDBS ~ maternal_sisters_children_born_PTB + KON + AR + AR2 + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far),data = filter(dat_m21, parity_clean ==1) )
+m2p1 = lm(GRDBS ~ as.numeric(maternal_sisters_children_born_PTB) + KON + AR + AR2 + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far),data = filter(dat_m22, parity_clean ==1) )
 betamp1=beta_CI(m2p1, 0.025,0.975)
 
-m2p2 = lm(GRDBS ~ maternal_sisters_children_born_PTB + KON + AR + AR2 + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far),data = filter(dat_m21, parity_clean ==2) )
+m2p2 = lm(GRDBS ~ as.numeric(maternal_sisters_children_born_PTB) + KON + AR + AR2 + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far),data = filter(dat_m22, parity_clean ==2) )
 betamp2=beta_CI(m2p2, 0.025,0.975)
 
-m2p3 = lm(GRDBS ~ maternal_sisters_children_born_PTB + KON + AR + AR2 + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far),data = filter(dat_m21, parity_clean ==3) )
+m2p3 = lm(GRDBS ~ as.numeric(maternal_sisters_children_born_PTB) + KON + AR + AR2 + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far),data = filter(dat_m22, parity_clean ==3) )
 betamp3=beta_CI(m2p3, 0.025,0.975)
 
-m2p4 = lm(GRDBS ~ maternal_sisters_children_born_PTB + KON + AR + AR2 + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far),data = filter(dat_m21, parity_clean >= 4) )
+m2p4 = lm(GRDBS ~ as.numeric(maternal_sisters_children_born_PTB) + KON + AR + AR2 + MALDER + MALDER2 + as.numeric(max_grade_mor) + as.numeric(max_grade_far),data = filter(dat_m22, parity_clean >= 4) )
 betamp4=beta_CI(m2p4, 0.025,0.975)
 
 
