@@ -30,7 +30,9 @@ rule all:
         "/home/karin/Parity_gestational_duration_interaction/results/supplementary/parity_maternal_age_plotdata.csv",
         "/home/karin/Parity_gestational_duration_interaction/results/supplementary/maternal_characteristics_descriptive_supp_table1.csv",
         "/home/karin/Parity_gestational_duration_interaction/results/supplementary/simulation_group_bias_supp_table2.csv",
-
+        "/home/karin/Parity_gestational_duration_interaction/results/supplementary/ultrasound_supp_fig.png",
+        "/home/karin/Parity_gestational_duration_interaction/results/supplementary/ultrasound_supp_fig_model_info.csv",
+        "/home/karin/Parity_gestational_duration_interaction/results/supplementary/plotdata_ultrasound_supp_fig.csv"
 
 ## Data cleaning 
 # Script filtering
@@ -305,4 +307,22 @@ rule simulation_bias:
 
 
 
+# Regression GD ~ Parity, only ultrasound. QQ-plot
+rule gd_parity_ultrasound:
+    input:
+        "/mnt/hdd/common/karin/Parity_gestational_duration_interaction/mfr_150202_recored_filtered_p1_all_variables.csv"
+
+    output:
+        "/home/karin/Parity_gestational_duration_interaction/results/supplementary/ultrasound_supp_fig.png",
+        "/home/karin/Parity_gestational_duration_interaction/results/supplementary/ultrasound_supp_fig_model_info.csv",
+        "/home/karin/Parity_gestational_duration_interaction/results/supplementary/plotdata_ultrasound_supp_fig.csv"
+
+    conda:
+        "/home/karin/Parity_gestational_duration_interaction/envs/plots.yaml"
+
+    params:
+        "/home/karin/Parity_gestational_duration_interaction/scripts/functions/1_cleaning_modules.R"
+
+    script:
+        "/home/karin/Parity_gestational_duration_interaction/scripts/plots/Supplementary/ultrasound.R"
 
