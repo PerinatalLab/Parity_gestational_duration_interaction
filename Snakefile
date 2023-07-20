@@ -326,3 +326,24 @@ rule gd_parity_ultrasound:
     script:
         "/home/karin/Parity_gestational_duration_interaction/scripts/plots/Supplementary/ultrasound.R"
 
+
+
+# Regression GD ~ Parity, if not removing mother with only one pregnancy
+rule gd_parity_supp:
+    input:
+        "/mnt/hdd/common/karin/Parity_gestational_duration_interaction/mfr_150202_recored_filtered_p1_all_variables.csv"
+
+    output:
+        "/home/karin/Parity_gestational_duration_interaction/results/supplementary/gdparity.eps",
+        "/home/karin/Parity_gestational_duration_interaction/results/supplementary/model_info_gdparity.csv",
+        "/home/karin/Parity_gestational_duration_interaction/results/supplementary/plotdata_gdparity.csv"
+
+    conda:
+        "/home/karin/Parity_gestational_duration_interaction/envs/plots.yaml"
+
+    params:
+        "/home/karin/Parity_gestational_duration_interaction/scripts/functions/1_cleaning_modules.R"
+
+    script:
+        "/home/karin/Parity_gestational_duration_interaction/scripts/plots/Supplementary/Parity_affects_gd.R"
+
