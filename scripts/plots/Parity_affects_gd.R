@@ -68,6 +68,9 @@ dat_m1 = fun_spont1990(dat1)
 dat_m2 = dat_m1 %>% group_by(lpnr_mor) %>% filter(n()>1) # atleast 2 preg per mother
 dat_m3 = dat_m1 %>% filter(AR >=1992) %>%  filter(!is.na(unwilling_subfertility),!is.na(BMI), !is.na(diab), !is.na(preeclamspia), !is.na(smoking)) %>% group_by(lpnr_mor) %>% filter(n()>1)
 
+print("min, max, median and mean of number of pregnancies:")
+print(dat_m2 %>% group_by(lpnr_mor) %>% mutate(n=n()) %>% ungroup() %>% summarize(min = min(n),max = max(n), median = median(n), mean = mean(n)))
+
 ## one random preg
 set.seed(42)
 rows <- sample(nrow(dat_m2))
